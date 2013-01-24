@@ -44,7 +44,11 @@ for ip in $(cat /tmp/snmpscanIP); do
 
 	snmpfile="/tmp/snmpscan$ip"
 	snmpwalk -c $community_string -v 1 $ip > $snmpfile
-	echo "    scan is done. Result is stored in /tmp/snmpscan$ip"
+	if [ -s $snmpfile ]; then 
+		echo "    scan is done. Result is stored in /tmp/snmpscan$ip"
+	else
+		echo "[-] no result from $ip"
+	fi
 
 	#show grep result
 	grep -A 1 $grep_string $snmpfile | cut -d' ' -f4 | sed "s/^/[*] $ip /" >> /tmp/snmpscanout
@@ -53,6 +57,6 @@ done
 echo "finish."
 
 echo '-----------------------------'
-cat /tmp/snmpscanout | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n
+cat /tmp/snmpscanout
 echo '-----------------------------'
 echo "output is also stored at /tmp/snmpscanout."
