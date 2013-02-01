@@ -33,7 +33,8 @@ fi
 
 echo "Scanning $iprange and saving result IP address to /tmp/snmpscanIP"
 #nmap -n -sS -p 161,162,10161,10162 $iprange | grep 'for' | sed  's/\(^.*(\)\|)//g' > /tmp/snmpscanIP
-nmap -n -PS161,162,10161,10162 -sn $iprange | grep 'for' | cut -d' ' -f5 > /tmp/snmpscanIP
+#nmap -n -PS161,162,10161,10162 -sn $iprange | grep 'for' | cut -d' ' -f5 > /tmp/snmpscanIP
+nmap -n -sU -p 161 $iprange | grep 'for' | cut -d' ' -f5 > /tmp/snmpscanIP
 echo "scan completed."
 
 echo "clean file /tmp/snmpscanout"
@@ -44,7 +45,7 @@ for ip in $(cat /tmp/snmpscanIP); do
 	echo "[+] snmpwalk on $ip" 
 
 	snmpfile="/tmp/snmpscan$ip"
-	snmpwalk -r 0 -t 2 -c $community_string -v 1 $ip > $snmpfile
+	snmpwalk -r 2 -t 2 -c $community_string -v 1 $ip > $snmpfile
 	if [ -s $snmpfile ]; then 
 		echo "[*] scan is done. Result is stored in /tmp/snmpscan$ip"
 
@@ -57,10 +58,10 @@ for ip in $(cat /tmp/snmpscanIP); do
 		password=$( echo $data|cut -d' ' -f2 )
 
 		# show hw name
-		hwname=$( grep 'iso.3.6.1.2.1.1.5.0' $snmpfile | cut -d' ' -f4- )
+		hwname=$( grep 'iso.3.6.1.2.1.1.5.0' $snmpfile | cut -d' ' -f4- | sed 's/\([^"]\)$/\1"/' )
 
 		# show hw version
-		hwversion=$( grep 'iso.3.6.1.2.1.1.1.0' $snmpfile | cut -d' ' -f4- )
+		hwversion=$( grep 'iso.3.6.1.2.1.1.1.0' $snmpfile | cut -d' ' -f4- | sed 's/\([^"]\)$/\1"/' )
 
 		echo -e "$ip\t$username\t$password\t$hwname\t$hwversion" >> /tmp/snmpscanout
 
