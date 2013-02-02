@@ -21,6 +21,7 @@ if [ $# -ge 2 ]; then
 	community_string=$2
 else
 	# default community string of True Corp is ADSL
+	# for 3BB, it is 3bbnet
 	community_string='ADSL' 
 fi
 
