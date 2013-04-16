@@ -1,0 +1,7 @@
+# To use this file, using command:
+# => bundle
+
+source 'http://rubygems.org'
+
+# Require 'hpricot' for parsing HTML page
+gem 'hpricot'
