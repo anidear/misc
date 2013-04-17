@@ -15,7 +15,7 @@ require 'hpricot'
 # Parsing Input
 options = {}
 OptionParser.new do |opts|
-	opts.banner = "Usage: reversedns.rb [options] IP"
+	opts.banner = "Usage: reverse_dns.rb [options] IP"
 
 	opts.on("-v", "--verbose", "Run verbosely") do |v|
 		options[:verbose] = v
