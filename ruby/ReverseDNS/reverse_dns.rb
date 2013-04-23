@@ -8,6 +8,7 @@
 
 require 'rubygems'
 require 'optparse'
+require 'socket'
 require 'uri'
 require 'open-uri'
 require 'hpricot'
@@ -32,9 +33,25 @@ OptionParser.new do |opts|
 end.parse!
 
 if ARGV.size >= 1
-	ip = ARGV[0]
+	if ARGV[0] =~ /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/
+		#input as IP
+		ip = ARGV[0]
+		puts "Using IP address : #{ip}"
+	else
+		#input as hostname
+		ip_list = Socket.getaddrinfo(ARGV[0],nil,:INET,:RAW).map{|result| result[3]}
+		if ip_list.empty?
+			puts "Invalid hostname: cannot retrieve IP address from #{ARGV[0]}"
+			exit
+		else
+			puts "Found #{ip_list.size} IP : #{ip_list.to_s}"
+			puts "Using the first IP : #{ip_list[0]}"
+			ip = ip_list[0]
+		end
+	end
 else
 	ip = '210.1.61.196'	# default ip address of stephack.com
+	puts "Using IP address : #{ip}"
 end
 
 # contants
