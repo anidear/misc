@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# encoding: UTF-8
 
 # Reverse IP to domain names
 # Author: Anidear
@@ -9,7 +10,6 @@
 require 'rubygems'
 require 'optparse'
 require 'socket'
-require 'uri'
 require 'open-uri'
 require 'hpricot'
 
@@ -69,13 +69,21 @@ def first_page(ip)
 	return [doc,count,pagination]
 end
 
+# Get hostname from URL
+# - url : a URL
+# can be substitute by URI.host, but has some problem with non-english URL
+def get_host_name(url)
+	match = %r|(https?://)?(?<host>[^/]+)(/.*$)?|.match(url)
+	match['host']
+end
+
 # Parsing for URLs from a given Hpricot HTML page
 # - doc : Hpricot HTML page
 # - domains : Hash for store output parsed domains
 def parse_for_urls(doc, domains)
 	links = doc.search('//*[@id="wg0"]/li/div/div/div[1]/h3/a')
 	links.each do |link|
-		domain = URI(link.attributes['href']).host
+		domain = get_host_name(link.attributes['href'])
 		domains[domain] = link.inner_text
 	end
 	return domains
