@@ -11,11 +11,22 @@ if ARGV.size < 1
 	exit 1
 end
 
+# reveal concealed email in url 
+def reveal_email(crypted)
+	r = crypted[0..1].to_i(16)
+	plain = crypted[2..-1].scan(/../).map{|i| i.to_i(16)^r}.pack('C*')
+	return plain
+end
+
 # Parse page for site data
 def parse_page(doc)
 	results = []
-	sites = doc.search('//tbody/tr')
+	sites = doc.search('//table[@class="sTable"]/tbody/tr')
 	sites.each do |site|
+		#remove all scripting 
+		site.search('//script').remove
+
+		#parse text from each table cell
 		cols = site.search('//td')
 		site = Hash.new
 		site[:time] = cols[0].inner_text
@@ -23,6 +34,12 @@ def parse_page(doc)
 		site[:team] = cols[2].inner_text
 		site[:country] = cols[6].attributes['title']
 		site[:site] = cols[8].inner_text
+		if site[:site] =~ /\[email protected\]/
+			cols[8].search('//a').each do |hidden_email|
+				hidden_email.inner_html = reveal_email(hidden_email.attributes['data-cfemail'])
+			end
+			site[:site] = cols[8].inner_text
+		end
 		site[:os] = cols[9].inner_text
 		site[:mirror] = cols[10].search('//a').attr('href')
 		results << site
