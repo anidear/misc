@@ -56,12 +56,24 @@ begin
 	total_pages = (total_deface / 25.0).ceil
 
 	# Get the other pages
+	prev_size = results.size
+	cur_size = results.size
 	(2..total_pages).each do |page_no|
 		warn "Parsing page ##{page_no}"
 		open("http://www.hack-db.com/search_#{page_no}.html",'Cookie' => cookie) do |page|
 			doc = Hpricot(page)
 			results += parse_page(doc)
-			warn "Results size = #{results.size}"
+		end
+		
+		results.uniq!
+		cur_size = results.size
+		warn "Results size = #{cur_size}"
+		
+		# check if no more new result
+		if prev_size == cur_size
+			break
+		else
+			prev_size = cur_size
 		end
 	end
 rescue SystemExit, Interrupt
